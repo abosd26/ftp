@@ -4,7 +4,6 @@ The system is a multi-client server structure, based on UDP protocol stop-and-wa
 Moreover, checksum method and retransmit mechanism for error control are implemented.
 
 Notice: The program must be executed by superuser privileges.
-        To make sure the correctness of processing, specify NIC is needed.
 
 client: 1. Usage => ./myftpClient &ltport #&gt &ltfile name&gt 
         2. Connect to server.  
