@@ -1,4 +1,4 @@
-# ftp
+# ftp-like
 <pre>
 The system is a multi-client server structure, based on UDP protocol stop-and-wait process, file transmission program. 
 Moreover, checksum method and retransmit mechanism for error control are implemented.
