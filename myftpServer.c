@@ -16,9 +16,9 @@ int main( int argc,char **argv ) {
 	}
 	//need superuser authority to start server
 	if(getuid() != 0){
-                printf("Error: To start server, you must have super user authority!\n");
-                exit(1);
-        }
+		printf("Error: To start server, you must have super user authority!\n");
+		exit(1);
+	}
 
 	/* Check if file exist. */
 	if( lstat( argv[2], &buf ) < 0 ) {
@@ -44,7 +44,7 @@ int main( int argc,char **argv ) {
 	}
 	printf("Share file: %s\n", argv[2]);
 	//Function: Server can serve multiple clients
-    //Hint: Use loop, listenClient(), startMyFtpServer(), and ( fork() or thread )
+	//Hint: Use loop, listenClient(), startMyFtpServer(), and ( fork() or thread )
 	while( 1 ) {
 		if(listenClient(socketfd, atoi(argv[1]), &tmpPort, argv[2], &clientaddr, device)){
 			printf("listenClient error!\n");

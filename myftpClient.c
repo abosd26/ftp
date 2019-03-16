@@ -18,7 +18,7 @@ int main( int argc, char **argv ) {
 	socketfd = socket(AF_INET, SOCK_DGRAM, 0);
 	if(socketfd < 0){
 		printf("Error opening socket!\n");
-                exit(1);
+		exit(1);
 	}
 	//get device name
 	if(getDeviceName(socketfd, device)){
@@ -40,7 +40,7 @@ int main( int argc, char **argv ) {
 		printf("findServerAddr error!\n");
 		exit(1);
 	}
-	
+
 	/* Start ftp client */
 	if(startMyftpClient(socketfd, &servaddr, argv[2])){
 		printf("startMyfptClient error!\n");

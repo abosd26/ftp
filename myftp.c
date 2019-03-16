@@ -1,8 +1,8 @@
 #include	"myftp.h"
 
 int getDeviceName( int socketfd, char *device ) {
-    //Function: To get the device name
-    //Hint:     Use ioctl() with SIOCGIFCONF as an arguement to get the interface list
+	//Function: To get the device name
+	//Hint:     Use ioctl() with SIOCGIFCONF as an arguement to get the interface list
 	struct ifconf ifconf;
 	struct ifreq ifr[10];
 	ifconf.ifc_len = sizeof(ifr);
@@ -16,31 +16,31 @@ int getDeviceName( int socketfd, char *device ) {
 }
 
 int initServerAddr( int socketfd, int port, const char *device, struct sockaddr_in *addr ) {
-    //Function: Bind device with socketfd
-    //          Set sever address(struct sockaddr_in), and bind with socketfd
-    //Hint:     Use setsockopt to bind the device
-    //          Use bind to bind the server address(struct sockaddr_in)
+	//Function: Bind device with socketfd
+	//          Set sever address(struct sockaddr_in), and bind with socketfd
+	//Hint:     Use setsockopt to bind the device
+	//          Use bind to bind the server address(struct sockaddr_in)
 	//clear the buffer to 0s
 	memset((char *)addr, 0, sizeof(*addr));
-        //code for address family, constant
-        addr->sin_family = AF_INET;
-        //host ip which server will receive, INADDR_ANY will set it as 0.0.0.0(means every hosts can be receive)
-        addr->sin_addr.s_addr = INADDR_ANY;
+	//code for address family, constant
+	addr->sin_family = AF_INET;
+	//host ip which server will receive, INADDR_ANY will set it as 0.0.0.0(means every hosts can be receive)
+	addr->sin_addr.s_addr = INADDR_ANY;
 	//printf("my address : %s\n", inet_ntoa(addr->sin_addr));
-        //port #, converted from host byte order to network byte order
-        addr->sin_port = htons(port);
-        //set the socket to be bind with NIC name
+	//port #, converted from host byte order to network byte order
+	addr->sin_port = htons(port);
+	//set the socket to be bind with NIC name
 	if(setsockopt(socketfd, SOL_SOCKET, SO_BINDTODEVICE, device, sizeof(device))){
 		printf("setsockopt error!\n");
 		return -1;
 	}
-        //bind system call, bind the socket to the address
-        if(bind(socketfd, (struct sockaddr *)addr, sizeof(*addr)) < 0){
-        	printf("Error on binding!");
+	//bind system call, bind the socket to the address
+	if(bind(socketfd, (struct sockaddr *)addr, sizeof(*addr)) < 0){
+		printf("Error on binding!");
 		return -1;
-        }
+	}
 	printf("Myftp Server Start!!\n");
-        //printf("Share file: %s\n", filename);
+	//printf("Share file: %s\n", filename);
 	return 0;
 }
 int listenClient(int socketfd, int port, int *tempPort, char *filename, struct sockaddr_in *clientaddr, const char* device){
@@ -65,57 +65,57 @@ int listenClient(int socketfd, int port, int *tempPort, char *filename, struct s
 			//get server ip
 			struct ifreq req;
 			memset(&req, 0, sizeof(req));
-                	strcpy(req.ifr_name, device);
-                	if(ioctl(socketfd, SIOCGIFADDR, &req) == -1){
-                        	printf("Error in getting ip\n");
-                        	return -1;
-                	}
-                	char* myip = inet_ntoa(((struct sockaddr_in*)&req.ifr_addr)->sin_addr);
+			strcpy(req.ifr_name, device);
+			if(ioctl(socketfd, SIOCGIFADDR, &req) == -1){
+				printf("Error in getting ip\n");
+				return -1;
+			}
+			char* myip = inet_ntoa(((struct sockaddr_in*)&req.ifr_addr)->sin_addr);
 			strcpy(buffer.servAddr, myip);
 			buffer.connectPort = *tempPort;
 			strcpy(buffer.filename, filename);
 			int n = sendto(socketfd, &buffer, sizeof(buffer), 0, (struct sockaddr *)clientaddr, sizeof(struct sockaddr_in));
-	        	if(n < 0){
-          	      		int errsv = errno;
-                		printf("sendto error! %d\n", errsv);
-                		return -1;
-        		}
+			if(n < 0){
+				int errsv = errno;
+				printf("sendto error! %d\n", errsv);
+				return -1;
+			}
 			break;
 		}
 	}
 	return 0;
 }
 int initClientAddr( int socketfd, int port, char *sendClient, struct sockaddr_in *addr ) {
-    //Function: Set socketfd with broadcast option and the broadcast address(struct sockaddr_in)
-    //Hint:     Use setsockopt to set broadcast option
+	//Function: Set socketfd with broadcast option and the broadcast address(struct sockaddr_in)
+	//Hint:     Use setsockopt to set broadcast option
 	int broadcast = 1;
 	//set socketfd with broadcast option
-        if(setsockopt(socketfd, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast))){
-                printf("setsockopt error!\n");
-                return -1;
-        }
+	if(setsockopt(socketfd, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast))){
+		printf("setsockopt error!\n");
+		return -1;
+	}
 	//set timeout mechanism for socket
-        struct timeval timeout = {TIMELIMIT, 0};
-        if(setsockopt(socketfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(struct timeval))){
-                printf("setsockopt SO_RCVTIMEO error!\n");
-                return -1;
-        }
+	struct timeval timeout = {TIMELIMIT, 0};
+	if(setsockopt(socketfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(struct timeval))){
+		printf("setsockopt SO_RCVTIMEO error!\n");
+		return -1;
+	}
 	//clear the buffer to 0s
-        memset((char *)addr, 0, sizeof(*addr));
-        //code for address family, constant
-        addr->sin_family = AF_INET;
-        //destination ip, use INADDR_BROADCAST for sending a broadcast packet
-        addr->sin_addr.s_addr = INADDR_BROADCAST;
-        //server port #, converted from host byte order to network byte order
-        addr->sin_port = htons(port);
+	memset((char *)addr, 0, sizeof(*addr));
+	//code for address family, constant
+	addr->sin_family = AF_INET;
+	//destination ip, use INADDR_BROADCAST for sending a broadcast packet
+	addr->sin_addr.s_addr = INADDR_BROADCAST;
+	//server port #, converted from host byte order to network byte order
+	addr->sin_port = htons(port);
 	return 0;
 }
 
 int findServerAddr( int socketfd, char *filename, const struct sockaddr_in *broadaddr, struct sockaddr_in *servaddr ) {
-    //Function: Send broadcast message to find server
-    //          Set timeout to wait for server replay
-    //Hint:     Use struct startServerInfo as boradcast message
-    //          Use setsockopt to set timeout
+	//Function: Send broadcast message to find server
+	//          Set timeout to wait for server replay
+	//Hint:     Use struct startServerInfo as boradcast message
+	//          Use setsockopt to set timeout
 	struct startServerInfo packet;
 	int servaddr_size;
 
@@ -140,7 +140,7 @@ int findServerAddr( int socketfd, char *filename, const struct sockaddr_in *broa
 		return -1;
 	}
 	//server port #, converted from host byte order to network byte order
-        servaddr->sin_port = htons(packet.connectPort);
+	servaddr->sin_port = htons(packet.connectPort);
 	printf("[Receive Reply]\n");
 	printf("\t\tGet MyftpServer servAddr : %s\n", packet.servAddr);
 	printf("\t\tMyftp connectPort : %d\n", packet.connectPort);
@@ -149,35 +149,35 @@ int findServerAddr( int socketfd, char *filename, const struct sockaddr_in *broa
 
 int startMyftpServer( int tempPort, struct sockaddr_in *clientaddr, const char *filename ) {
 	/* Open socket. */
-        int socketfd = socket(AF_INET, SOCK_DGRAM, 0);
-        if(socketfd < 0){
-                printf("Error opening socket!\n");
-                exit(1);
-        }
+	int socketfd = socket(AF_INET, SOCK_DGRAM, 0);
+	if(socketfd < 0){
+		printf("Error opening socket!\n");
+		exit(1);
+	}
 	struct sockaddr_in addr;
 	//clear the buffer to 0s
-        memset((char *)&addr, 0, sizeof(addr));
-        //code for address family, constant
-        addr.sin_family = AF_INET;
-        //server ip, INADDR_ANY will get it automatically
-        addr.sin_addr.s_addr = INADDR_ANY;
-        //server port #, converted from host byte order to network byte order
-        addr.sin_port = htons(tempPort);
+	memset((char *)&addr, 0, sizeof(addr));
+	//code for address family, constant
+	addr.sin_family = AF_INET;
+	//server ip, INADDR_ANY will get it automatically
+	addr.sin_addr.s_addr = INADDR_ANY;
+	//server port #, converted from host byte order to network byte order
+	addr.sin_port = htons(tempPort);
 	//bind system call, bind the socket to the address
-        if(bind(socketfd, (struct sockaddr *)&addr, sizeof(addr)) < 0){
-                printf("Error on binding!");
-                return -1;
-        }
+	if(bind(socketfd, (struct sockaddr *)&addr, sizeof(addr)) < 0){
+		printf("Error on binding!");
+		return -1;
+	}
 	//set timeout mechanism for socket
-        struct timeval timeout = {TIMELIMIT, 0};
-        if(setsockopt(socketfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(struct timeval))){
-                printf("setsockopt SO_RCVTIMEO error!\n");
-                return -1;
-        }
+	struct timeval timeout = {TIMELIMIT, 0};
+	if(setsockopt(socketfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(struct timeval))){
+		printf("setsockopt SO_RCVTIMEO error!\n");
+		return -1;
+	}
 	//receive FRQ from client
 	int frqSize = sizeof(struct myFtphdr) + FNAMELEN - 1;
-        int dataSize = sizeof(struct myFtphdr) + MFMAXDATA - 1;
-        int msgSize = sizeof(struct myFtphdr);
+	int dataSize = sizeof(struct myFtphdr) + MFMAXDATA - 1;
+	int msgSize = sizeof(struct myFtphdr);
 	struct myFtphdr *frq = (struct myFtphdr *)malloc(frqSize);
 	int clientaddr_size;
 
@@ -185,12 +185,12 @@ int startMyftpServer( int tempPort, struct sockaddr_in *clientaddr, const char *
 		int recvSize = recvfrom(socketfd, frq, frqSize, 0, (struct sockaddr *)clientaddr, &clientaddr_size);
 		if(recvSize < 0){
 			if(errno == EAGAIN || errno == EWOULDBLOCK){
-                        	printf("wait client time out\n");
-                	}
-                	else{
-                        	printf("recvfrom error!\n");
+				printf("wait client time out\n");
+			}
+			else{
+				printf("recvfrom error!\n");
 				return -1;
-                	}
+			}
 		}
 	}while(errno == EAGAIN || errno == EWOULDBLOCK || ntohs(frq->mf_opcode) != FRQ);
 	free(frq);
@@ -240,26 +240,26 @@ int startMyftpServer( int tempPort, struct sockaddr_in *clientaddr, const char *
 		}
 		//receive ACK from client, retransmit last block of data if receive ERROR
 		int recvSize = recvfrom(socketfd, msg, msgSize, 0, (struct sockaddr *)clientaddr, &clientaddr_size);
-                if(recvSize < 0){
-                        if(errno == EAGAIN || errno == EWOULDBLOCK){
-                                printf("time out waiting ACK, send data again\n");
+		if(recvSize < 0){
+			if(errno == EAGAIN || errno == EWOULDBLOCK){
+				printf("time out waiting ACK, send data again\n");
 				usleep(50);
 				data->mf_cksum = 0;
 				data->mf_cksum = in_cksum((unsigned short *)data, dataSize);
 				int n = sendto(socketfd, data, dataSize, 0, (struct sockaddr *)clientaddr, sizeof(struct sockaddr_in));
-	                        if(n < 0){
-        	                        printf("sendto error\n");
-                	                return -1;
-                        	}
+				if(n < 0){
+					printf("sendto error\n");
+					return -1;
+				}
 				retransmit = 1;
 				//fseek(fptr, -byteCount, SEEK_CUR);
 				continue;
-                        }
-                        else{
-                                printf("recvfrom error!\n");
-                                return -1;
-                        }
-                }
+			}
+			else{
+				printf("recvfrom error!\n");
+				return -1;
+			}
+		}
 		if(retransmit == 1){
 			retransmit = 0;
 		}
@@ -280,10 +280,10 @@ int startMyftpServer( int tempPort, struct sockaddr_in *clientaddr, const char *
 			data->mf_cksum = 0;
 			data->mf_cksum = in_cksum((unsigned short *)data, dataSize);
 			int n = sendto(socketfd, data, dataSize, 0, (struct sockaddr *)clientaddr, sizeof(struct sockaddr_in));
-                        if(n < 0){
-                                printf("sendto error\n");
-                                return -1;
-                        }
+			if(n < 0){
+				printf("sendto error\n");
+				return -1;
+			}
 			retransmit = 1;
 			//fseek(fptr, -byteCount, SEEK_CUR);
 		}
@@ -324,42 +324,42 @@ int startMyftpClient( int socketfd, struct sockaddr_in *servaddr, const char *fi
 	char *fname = (char *)malloc(sizeof(char) * FNAMELEN);
 	strcpy(fname, "client_");
 	FILE *fptr = fopen(strcat(fname, filename), "wb");
-        int blockNum = 1, byteCount, byteSum = 0, realNum = 1, isFirst = 1;
-        char *block = (char *)malloc(sizeof(char) * 512);
-        struct myFtphdr *data = (struct myFtphdr *)malloc(dataSize);
-        struct myFtphdr *msg = (struct myFtphdr *)malloc(msgSize);
-        /*//print total file size
-        fseek(fptr, 0, SEEK_END);
-        printf("total file size : %ld bytes\n", ftell(fptr));
-        rewind(fptr);*/
-        while(1){
-                //receive data from server
-                int recvSize = recvfrom(socketfd, data, dataSize, 0, (struct sockaddr *)servaddr, &servaddr_size);
-                if(recvSize < 0){
-                        if(errno == EAGAIN || errno == EWOULDBLOCK){
-                                printf("time out waiting data\n");
+	int blockNum = 1, byteCount, byteSum = 0, realNum = 1, isFirst = 1;
+	char *block = (char *)malloc(sizeof(char) * 512);
+	struct myFtphdr *data = (struct myFtphdr *)malloc(dataSize);
+	struct myFtphdr *msg = (struct myFtphdr *)malloc(msgSize);
+	/*//print total file size
+	fseek(fptr, 0, SEEK_END);
+	printf("total file size : %ld bytes\n", ftell(fptr));
+	rewind(fptr);*/
+	while(1){
+		//receive data from server
+		int recvSize = recvfrom(socketfd, data, dataSize, 0, (struct sockaddr *)servaddr, &servaddr_size);
+		if(recvSize < 0){
+			if(errno == EAGAIN || errno == EWOULDBLOCK){
+				printf("time out waiting data\n");
 				//if client didn't receive first block of data, then resend FRQ	to server for file requestion
 				if(isFirst){
 					struct myFtphdr *frq = (struct myFtphdr *)malloc(frqSize);
-        				memset((char *)frq, 0, frqSize);
-        				frq->mf_opcode = htons(FRQ);
-        				memcpy(frq->mf_filename, filename, FNAMELEN);
-        				frq->mf_cksum = in_cksum((unsigned short *)frq, frqSize);
-        				int n = sendto(socketfd, frq, frqSize, 0, (struct sockaddr *)servaddr, sizeof(struct sockaddr_in));
+					memset((char *)frq, 0, frqSize);
+					frq->mf_opcode = htons(FRQ);
+					memcpy(frq->mf_filename, filename, FNAMELEN);
+					frq->mf_cksum = in_cksum((unsigned short *)frq, frqSize);
+					int n = sendto(socketfd, frq, frqSize, 0, (struct sockaddr *)servaddr, sizeof(struct sockaddr_in));
 					free(frq);
-        				if(n < 0){
-                				printf("sendto error\n");
-                				return -1;
-        				}
+					if(n < 0){
+						printf("sendto error\n");
+						return -1;
+					}
 					printf("resend FRQ\n");
 				}
 				continue;
-			 }
-                        else{
-                                printf("recvfrom error!errno : %d\n", errno);
+			}
+			else{
+				printf("recvfrom error!errno : %d\n", errno);
 				return -1;
-                        }
-                }
+			}
+		}
 		if(isFirst){
 			isFirst = 0;
 		}
@@ -389,23 +389,23 @@ int startMyftpClient( int socketfd, struct sockaddr_in *servaddr, const char *fi
 			printf("received data checksum error, the block is %d\n", realNum);
 			msg->mf_opcode = htons(ERROR);
 		}
-                int n = sendto(socketfd, msg, msgSize, 0, (struct sockaddr *)servaddr, sizeof(struct sockaddr_in));
-                if(n < 0){
-                        printf("sendto error\n");
-                         return -1;
-                }
+		int n = sendto(socketfd, msg, msgSize, 0, (struct sockaddr *)servaddr, sizeof(struct sockaddr_in));
+		if(n < 0){
+			printf("sendto error\n");
+			return -1;
+		}
 		//finish download
 		if(msg->mf_block == 0){
 			break;
 		}
-        }
-        //data transmission is finish
+	}
+	//data transmission is finish
 	free(fname);
-        free(data);
-        free(msg);
-        free(block);
-        fclose(fptr);
-        printf("[file transmission - finish]\n");
+	free(data);
+	free(msg);
+	free(block);
+	fclose(fptr);
+	printf("[file transmission - finish]\n");
 	printf("\t\t%d bytes received\n", byteSum);
 	return 0;
 }
@@ -415,17 +415,17 @@ unsigned short in_cksum( unsigned short *addr, int len ) {
 	int sum = 0;
 	unsigned short *w = addr;
 	unsigned short answer = 0;
-	
+
 	while( nleft > 1 ) {
 		sum += *w++;
 		nleft -= 2;
 	}
-	
+
 	if( nleft == 1 ) {
 		*(unsigned char *) (&answer) = *(unsigned char *) w;
 		sum += answer;
 	}
-	
+
 	sum = (sum >> 16) + (sum & 0xFFFF);
 	sum += (sum >> 16);
 	answer = ~sum;
