@@ -113,7 +113,7 @@ int initClientAddr( int socketfd, int port, char *sendClient, struct sockaddr_in
 
 int findServerAddr( int socketfd, char *filename, const struct sockaddr_in *broadaddr, struct sockaddr_in *servaddr ) {
 	//Function: Send broadcast message to find server
-	//          Set timeout to wait for server replay
+	//          Set timeout to wait for server reply
 	//Hint:     Use struct startServerInfo as boradcast message
 	//          Use setsockopt to set timeout
 	struct startServerInfo packet;
@@ -141,6 +141,7 @@ int findServerAddr( int socketfd, char *filename, const struct sockaddr_in *broa
 	}
 	//server port #, converted from host byte order to network byte order
 	servaddr->sin_port = htons(packet.connectPort);
+	inet_aton(packet.servAddr, &servaddr->sin_addr);
 	printf("[Receive Reply]\n");
 	printf("\t\tGet MyftpServer servAddr : %s\n", packet.servAddr);
 	printf("\t\tMyftp connectPort : %d\n", packet.connectPort);
