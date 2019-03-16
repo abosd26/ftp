@@ -3,8 +3,8 @@
 The system is a multi-client server structure, based on UDP protocol stop-and-wait process, file transmission program. 
 Moreover, checksum method and retransmit mechanism for error control are implemented.
 
-Notice: The program must be executed by superuser privileges. In addition, the client host must have a default gw for broadcasting invoked 
-        by server discovery stage.
+Notice: The program must be executed by superuser privileges. In addition, the client host must have a default gw for the broadcasting 
+        packet, which is invoked in the server discovery stage.
 
 client: 1. Usage => ./myftpClient &ltport #&gt &ltfile name&gt 
         2. Connect to server.  
