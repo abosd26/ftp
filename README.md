@@ -9,6 +9,6 @@ Notice: The program must be executed by superuser privileges. In addition, the c
 client: 1. Usage => ./myftpClient &ltport #&gt &ltfile name&gt 
         2. Connect to server.  
 server: 1. Usage => ./myftpServer &ltport #&gt &ltfile name&gt  
-        2. Use multi-thread to handle requests from clients.  
+        2. Use multi-process to handle requests from clients.  
         3. 10% probability to make wrong checksum in order to test the reaction of client and the retransmission of server.
 </pre>
